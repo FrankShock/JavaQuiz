@@ -36,7 +36,7 @@ var questions = [
 ];
 var secondsLeft = 76;
 var holdInterval = 0;
-var penalty = 10;
+var penalty = 20;
 var ulCreate = document.createElement("ul");
 
 timer.addEventListener("click", function () {

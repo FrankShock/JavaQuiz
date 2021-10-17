@@ -2,14 +2,14 @@
     background-image: url("../images/code\ background.jpg");
 }
 #quizsection {
-   background-color: azure;
+   background-color: rgb(157, 247, 247);
     position: absolute;
     left: 25%;
     top: 10%;
     width: 600px;
     height: 600px;
-    border: 50px solid rgb(93, 214, 245);
-    border-radius: 25px;
+    border: 50px solid rgb(15, 196, 241);
+    border-radius: 35px;
 }
 #quizsection p{
     font-style: 15px;
