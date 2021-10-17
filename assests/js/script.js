@@ -1,218 +1,177 @@
-const startButton = document.getElementById("start-btn")
-const nextButton = document.getElementById("next-btn")
-const questionContainerElement = document.getElementById("question-container")
-const questionElement = document.getElementById("question")
-const answerButtonsElement = document.getElementById("answer-buttons")
-var Timer = setInterval (0)
 
+var score = 0;
+var questionIndex = 0;
 
-let shuffledQuestions, currentQuestionIndex, countDownTimer
+var currentTime = document.querySelector("#currentTime");
+var timer = document.querySelector("#startTime");
+var questionsDiv = document.querySelector("#questionssection");
+var wrapper = document.querySelector("#quizsection");
+var questions = [
+    {
+        title: "JavaScript File Has An Extension of:",
+        choices: [".Java", ".Js", ".javascript", ".xml"],
+        answer: ".Js"
+    },
+    {
+        title: "The condition in an if / else statement is enclosed within ____.",
+        choices: ["quotes", "curly brackets", "parentheses", "square brackets"],
+        answer: "parentheses"
+    },
+    {
+        title: "What are semicolons used for, in Javascript?",
+        choices: ["Separating statements", "Confirming values", "To create booleans", "all of the above"],
+        answer: "Separating statements"
+    },
+    {
+        title: "String values must be enclosed within ____ when being assigned to variables.",
+        choices: ["commas", "curly brackets", "quotes", "parenthesis"],
+        answer: "quotes"
+    },
+    {
+        title: "Commonly used data types DO NOT include:",
+        choices: ["strings", "booleans", "alerts", "numbers"],
+        answer: "alerts"
+    },
 
-let currentQuestion = {}
-let score = 0
-let questionCounter = 0
-let availableQuestion = []
+];
+var secondsLeft = 76;
+var holdInterval = 0;
+var penalty = 10;
+var ulCreate = document.createElement("ul");
 
+timer.addEventListener("click", function () {
+    if (holdInterval === 0) {
+        holdInterval = setInterval(function () {
+            secondsLeft--;
+            currentTime.textContent = "Time: " + secondsLeft;
 
-startButton.addEventListener('click', startGame, countDownTimer)
-nextButton.addEventListener('click', () => {
-    currentQuestionIndex++
-    setNextQuestion()
-
-})
-
-function startGame() {
-    startButton.classList.add('hide')
-    shuffledQuestions = questions.sort(() => Math.floor(Math.random()))
-    currentQuestionIndex = 0
-    questionContainerElement.classList.remove("hide")
-    setNextQuestion()
-    countDownTimer()
-    //call Timer here - Global variable Timer=setInterval () clear it with clearInterval
-    //look at timing events on w3
-    var sec = 60;
-    var countDownTimer = setInterval(function(){
-        document.getElementById('countDownTimer').innerHTML='00:'+sec;
-        sec--;
-        if (sec < 0) {
-            clearInterval(timer);
-        
-        }
-    }, 1000);
-    
-}
-
-// function timer(){
-//     var sec = 60;
-//     var countDownTimer = setInterval(function(){
-//         document.getElementById('countDownTimer').innerHTML='00:'+sec;
-//         sec--;
-//         if (sec < 0) {
-//             clearInterval(timer);
-        
-//         }
-//     }, 1000);
-// }
-
-function setNextQuestion() {
-    resetState()
-    showQuestion(shuffledQuestions[currentQuestionIndex])
-}
-
-function showQuestion(question) {
-    questionElement.innerText = question.question
-    question.answers.forEach(answer => {
-        const button = document.createElement("button")
-        button.innerText = answer.text
-        button.classList.add("btn")
-        if (answer.correct) {
-            button.dataset.correct = answer.correct
-        }
-        button.addEventListener("click", selectAnswer)
-        answerButtonsElement.appendChild(button)
-    })
-
-}
-
-function resetState() {
-    clearStatusClass(document.body)
-    nextButton.classList.add("hide")
-    while (answerButtonsElement.firstChild) {
-        answerButtonsElement.removeChild(answerButtonsElement.firstChild)
+            if (secondsLeft <= 0) {
+                clearInterval(holdInterval);
+                allDone();
+                currentTime.textContent = "Time's up!";
+            }
+        }, 1000);
     }
-}
+    render(questionIndex);
+});
 
-function selectAnswer(e) {
-    const selectedButton = e.target
-    const correct = selectedButton.dataset.correct
-    setStatusClass(document.body, correct)
-    Array.from(answerButtonsElement.children).forEach(button => {
-        setStatusClass(button, button.dataset.correct)
-    })
-    if (shuffledQuestions.length > currentQuestionIndex + 1) {
-        nextButton.classList.remove("hide")
-    }   else {
-        startButton.innerText = "Restart"
-        startButton.classList.remove("hide")
+
+function render(questionIndex) {
+    questionsDiv.innerHTML = "";
+    ulCreate.innerHTML = "";
+    for (var i = 0; i < questions.length; i++) {
+        var userQuestion = questions[questionIndex].title;
+        var userChoices = questions[questionIndex].choices;
+        questionsDiv.textContent = userQuestion;
     }
+   
+    userChoices.forEach(function (newItem) {
+        var listItem = document.createElement("li");
+        listItem.textContent = newItem;
+        questionsDiv.appendChild(ulCreate);
+        ulCreate.appendChild(listItem);
+        listItem.addEventListener("click", (compare));
+    })
 }
 
-function setStatusClass(element, correct) {
-    clearStatusClass(element)
-    if (correct) {
-        element.classList.add("correct")
+function compare(event) {
+    var element = event.target;
+
+    if (element.matches("li")) {
+
+        var createDiv = document.createElement("div");
+        createDiv.setAttribute("id", "createDiv");
+        if (element.textContent == questions[questionIndex].answer) {
+            score++;
+            createDiv.textContent = "Correct! NICE JOB! Correct answer:  " + questions[questionIndex].answer;
+        } else {
+            secondsLeft = secondsLeft - penalty;
+            createDiv.textContent = "OOPs Thats Wrong! The correct answer is:  " + questions[questionIndex].answer;
+        }
+
+    }
+    questionIndex++;
+
+    if (questionIndex >= questions.length) {
+        allDone();
+        createDiv.textContent = "Quiz is complete!" + " " + "Final Score  " + score + "/" + questions.length + " Correct!";
     } else {
-        element.classList.add("wrong")
-
+        render(questionIndex);
     }
+    questionsDiv.appendChild(createDiv);
+
 }
 
-function clearStatusClass(element) {
-    element.classList.remove("correct")
-    element.classList.remove("wrong")
+function allDone() {
+    questionsDiv.innerHTML = "";
+    currentTime.innerHTML = "";
+
+    var createH1 = document.createElement("h1");
+    createH1.setAttribute("id", "createH1");
+    createH1.textContent = "All Done!"
+
+    questionsDiv.appendChild(createH1);
+
+    var createP = document.createElement("p");
+    createP.setAttribute("id", "createP");
+
+    questionsDiv.appendChild(createP);
+
+  
+    if (secondsLeft >= 0) {
+        var timeRemaining = secondsLeft;
+        var createP2 = document.createElement("p");
+        clearInterval(holdInterval);
+        createP.textContent = "Your final score is: " + timeRemaining;
+
+        questionsDiv.appendChild(createP2);
+    }
+
+
+    var createLabel = document.createElement("label");
+    createLabel.setAttribute("id", "createLabel");
+    createLabel.textContent = "Enter your initials: ";
+
+    questionsDiv.appendChild(createLabel);
+
+   
+    var createInput = document.createElement("input");
+    createInput.setAttribute("type", "text");
+    createInput.setAttribute("id", "initials");
+    createInput.textContent = "";
+
+    questionsDiv.appendChild(createInput);
+
+ 
+    var createSubmit = document.createElement("button");
+    createSubmit.setAttribute("type", "submit");
+    createSubmit.setAttribute("id", "Submit");
+    createSubmit.textContent = "Submit";
+
+    questionsDiv.appendChild(createSubmit);
+
+   
+    createSubmit.addEventListener("click", function () {
+        var initials = createInput.value;
+
+        if (initials === null) {
+
+            console.log("No value entered!");
+
+        } else {
+            var finalScore = {
+                initials: initials,
+                score: timeRemaining
+            }
+            console.log(finalScore);
+            var allScores = localStorage.getItem("allScores");
+            if (allScores === null) {
+                allScores = [];
+            } else {
+                allScores = JSON.parse(allScores);
+            }    
+            createLabel.textContent = "Score saved ";
+        }
+    });
+
 }
-
-const questions = [
-    {
-        question: "What is a Javascript Function??",
-        answers: [
-            { text: "A block of code designed to perform a particular task", correct: true },
-            { text: "A way to make digital coffee", correct: false },
-            { text: "The job the whole app does", correct: false },
-            { text: "A value", correct: false },
-
-        ]
-    },
-    {
-        question: "What are Variables used for?",
-        answers: [
-            { text: "To make Functions work", correct: false },
-            { text: "To cause uncertainty", correct: false },
-            { text: "To store data values", correct: true },
-            { text: "To look all technical", correct: false },
-
-        ]
-    },
-    {
-        question: "What are semicolons used for, in Javascript?",
-        answers: [
-            { text: "Separating statements", correct: true },
-            { text: "Confirming values", correct: false },
-            { text: "Testing your patience", correct: false },
-            { text: "To start a new line of code", correct: false },
-
-        ]
-    },
-    {
-        question: "What is an Expression?",
-        answers: [
-            { text: "A face you pull when you want to smash your PC to pieces", correct: false },
-            { text: "A funny thing people say, round where you live", correct: false },
-            { text: "A combination of values, variables, and operators, which computes to a value", correct: true },
-            { text: "A variable operator, computed through the use of values", correct: false },
-
-        ]
-    },
-    {
-        question: "What is Keyword?",
-        answers: [
-            { text: "Magic words that open doors to secret places", correct: false },
-            { text: "Very important words in daily life", correct: false },
-            { text: "Words that you've been hypnotised to subconsciously respond to", correct: false },
-            { text: "Words used to identify actions to be performed in Javascript", correct: true },
-
-        ]
-    },
-    {
-        question: "Which of the following are NOT named using Identifiers, in Javascript?",
-        answers: [
-            { text: "variables", correct: false },
-            { text: "keywords", correct: false },
-            { text: "functions", correct: false },
-            { text: "operators", correct: true },
-
-        ]
-    },
-    {
-        question: "What is a string?",
-        answers: [
-            { text: "A piece of twine", correct: false },
-            { text: "a set of text values, set inside quotes and used for storing and manipulating data", correct: true },
-            { text: "Something nobody seems to know the length of", correct: false },
-            { text: "A long list of failures", correct: false },
-
-        ]
-    },
-    {
-        question: "Which of these is NOT a Javascript datatype?",
-        answers: [
-            { text: "Number", correct: false },
-            { text: "String", correct: false },
-            { text: "Cat", correct: true },
-            { text: "Boolean", correct: false },
-
-        ]
-    },
-    {
-        question: "How many times of number does Javascript have?",
-        answers: [
-            { text: "1", correct: true },
-            { text: "2", correct: false },
-            { text: "4", correct: false },
-            { text: "7", correct: false },
-
-        ]
-    },
-    {
-        question: "What is an Array?",
-        answers: [
-            { text: "A special kind of object", correct: false },
-            { text: "A set of numbers", correct: false },
-            { text: "A kind of variable that can hold more than one value at a time", correct: true },
-            { text: "A set of variables", correct: false },
-
-        ]
-    },
-
-
-]
